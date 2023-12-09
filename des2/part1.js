@@ -5,7 +5,8 @@ const inputContent = fs.readFileSync('./input.txt', 'utf-8')
 const games = inputContent.split('\n').map(game => game.trim())
 
 const parsedGames = games.map(game => {
-    const [gameNumber, draws] = game.split(':')
+    const [gameNumberText, draws] = game.split(':')
+    const [_, gameNumber] = gameNumberText.split(' ')
     const drawsArray = draws.split(';').map(draw => draw.trim())
 
     const gameDraws = drawsArray.map(draw => {
@@ -18,22 +19,21 @@ const parsedGames = games.map(game => {
         return drawObject
     })
     return {
-        gameNumber: gameNumber,
+        gameNumber: parseInt(gameNumber),
         draws: gameDraws
     }
 })
 console.log(parsedGames)
 const sumOfPossibleGames = parsedGames.reduce((acc, game) => {
-
-
     for(let i = 0; i < game.draws.length; i++) {
         const draw = game.draws[i]
         if(draw['red'] > 12 || draw['green'] > 13 || draw['blue'] > 14) {
-            continue
+            console.log(`Game ${game.gameNumber} is not possible due to this draw: `)
+            console.log(draw)
+            return acc
         }
-        acc += i
     }
-    return acc
-})
+    return acc + game.gameNumber
+}, 0)
 
-//console.log(sumOfPossibleGames)
+console.log(sumOfPossibleGames)
