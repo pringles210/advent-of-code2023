@@ -19,7 +19,7 @@ const parsedGames = games.map(game => {
         return drawObject
     })
     return {
-        gameNumber: parseInt(gameNumber),
+        number: parseInt(gameNumber),
         draws: gameDraws
     }
 })
@@ -28,12 +28,12 @@ const sumOfPossibleGames = parsedGames.reduce((acc, game) => {
     for(let i = 0; i < game.draws.length; i++) {
         const draw = game.draws[i]
         if(draw['red'] > 12 || draw['green'] > 13 || draw['blue'] > 14) {
-            console.log(`Game ${game.gameNumber} is not possible due to this draw: `)
+            console.log(`Game ${game.number} is not possible due to this draw: `)
             console.log(draw)
             return acc
         }
     }
-    return acc + game.gameNumber
+    return acc + game.number
 }, 0)
 
 console.log(sumOfPossibleGames)
