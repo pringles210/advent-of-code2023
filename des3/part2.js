@@ -5,7 +5,6 @@ const inputContent = fs.readFileSync('./input.txt', 'utf-8').split(/\r?\n/)
 let currentNumber = null
 let numberStartIndex = null
 let numberEndIndex = null
-//const nonSymbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']
 
 function findNumbersWithAdjacentSymbol(inputContent) {
     const numbers = []
@@ -23,17 +22,17 @@ function findNumbersWithAdjacentSymbol(inputContent) {
                 }
 
                 if(j === inputContent[i].length - 1) {
-                    const number = adjacentSymbolScan(i)
-                    if(number) {
-                        numbers.push(Number(number))
-                    }
+                    const gearCoordinates = adjacentSymbolScan(i)
+                    gearCoordinates.forEach(gc => {
+                        numbers.push(gc)
+                    })
                 }
             } else if(currentNumber !== null){
                 //check for adjacent symbols 
-                const number = adjacentSymbolScan(i)
-                if(number) {
-                    numbers.push(Number(number))
-                }
+                const gearCoordinates = adjacentSymbolScan(i)
+                gearCoordinates.forEach(gc => {
+                    numbers.push(gc)
+                })
             }
         }
     }
@@ -41,55 +40,77 @@ function findNumbersWithAdjacentSymbol(inputContent) {
 }
 
 function adjacentSymbolScan(i) {
-    let hasAdjacentSymbol = false
+    const numbersWithGearCoordinates = []
     let iterationStartIndex = numberStartIndex > 0 ? numberStartIndex - 1 : 0
     let iterationEndIndex = numberEndIndex < inputContent[i].length - 1 ? numberEndIndex + 1 : numberEndIndex
 
     //left side
     if(numberStartIndex > 0) {
-        if(inputContent[i][iterationStartIndex].includes('@'))) {
-            hasAdjacentSymbol = true
+        if(inputContent[i][iterationStartIndex].includes('*')) {
+            const number = { number: Number(currentNumber), numberStartIndexI: i, numberStartIndexJ: numberStartIndex, i: i, j: iterationStartIndex }
+            numbersWithGearCoordinates.push(number)
         }
     }
     //right side
-    if(!hasAdjacentSymbol && numberEndIndex < inputContent[i].length - 1) {
-        if(inputContent[i][iterationEndIndex].includes('@')) {
-            hasAdjacentSymbol = true
+    if(numberEndIndex < inputContent[i].length - 1) {
+        if(inputContent[i][iterationEndIndex].includes('*')) {
+            const number = { number: Number(currentNumber), numberStartIndexI: i, numberStartIndexJ: numberStartIndex, i: i, j: iterationEndIndex }
+            numbersWithGearCoordinates.push(number)
         }
     }
 
     //top
-    if(!hasAdjacentSymbol && i > 0) { //will only execute if current row is not top row
+    if(i > 0) { //will only execute if current row is not top row
         for(let t = iterationStartIndex; t <= iterationEndIndex; t++) {
-            if(inputContent[i - 1][t].includes('@')) {
-                hasAdjacentSymbol = true
+            if(inputContent[i - 1][t].includes('*')) {
+                const number = { number: Number(currentNumber), numberStartIndexI: i, numberStartIndexJ: numberStartIndex, i: i - 1, j: t }
+                numbersWithGearCoordinates.push(number)
             }
         }
     }
 
     //bottom
-    if(!hasAdjacentSymbol && i < inputContent.length - 1) {//will only execute if current row is not bottom row
+    if(i < inputContent.length - 1) {//will only execute if current row is not bottom row
         for(let b = iterationStartIndex; b <= iterationEndIndex; b++) {
-            if(inputContent[i + 1][b].includes('@')) {
-                hasAdjacentSymbol = true
+            if(inputContent[i + 1][b].includes('*')) {
+                const number = { number: Number(currentNumber), numberStartIndexI: i, numberStartIndexJ: numberStartIndex, i: i + 1, j: b }
+                numbersWithGearCoordinates.push(number)
             }
         }
     }
 
-    const numberToReturn = currentNumber
     currentNumber = null
     numberStartIndex = null
     numberEndIndex = null
-
-    if(hasAdjacentSymbol) {
-        return numberToReturn
-    }
+    return numbersWithGearCoordinates
 }
 
+const gearCoordinates = findNumbersWithAdjacentSymbol(inputContent)
+const sumOfAllExactlyTwoNumbersAdjacentToGear = gearCoordinates.reduce((accumulator, currentGearCoordinates) => {
+    const matchingCoordinates = gearCoordinates.filter(gc => {
+        if(gc.numberStartIndexI === currentGearCoordinates.numberStartIndexI && gc.numberStartIndexJ === currentGearCoordinates.numberStartIndexJ) {
+            return 
+        }
 
-const adjacentNumbers = findNumbersWithAdjacentSymbol(inputContent)
-const sum = adjacentNumbers.reduce((accumulator, currentNumber) => {
-    return accumulator + currentNumber
-}, 0)
+        if(gc.i !== currentGearCoordinates.i || gc.j !== currentGearCoordinates.j) {
+            return false
+        }
+        return true
+    })
 
-console.log(sum)
+    if(matchingCoordinates.length === 1) {
+        const matchingCoordinateIndex = gearCoordinates.findIndex(gc => {
+            const props = {
+                numberStartIndexI: matchingCoordinates[0].numberStartIndexI,
+                numberStartIndexJ: matchingCoordinates[0].numberStartIndexJ
+            }
+            return Object.keys(props).every(key => gc[key] === props[key])
+        })
+        gearCoordinates.splice(matchingCoordinateIndex, 1)
+        const multipliedNumbers = currentGearCoordinates.number * matchingCoordinates[0].number 
+        return accumulator + multipliedNumbers
+    }   
+    return accumulator
+}, 0) 
+
+console.log(sumOfAllExactlyTwoNumbersAdjacentToGear)

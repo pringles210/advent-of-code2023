@@ -86,7 +86,6 @@ function adjacentSymbolScan(i) {
     }
 }
 
-
 const adjacentNumbers = findNumbersWithAdjacentSymbol(inputContent)
 const sum = adjacentNumbers.reduce((accumulator, currentNumber) => {
     return accumulator + currentNumber
